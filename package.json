@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/RequireSun/clone-detection/issues"
   },
-  "homepage": "https://github.com/RequireSun/clone-detection#readme"
+  "homepage": "https://github.com/RequireSun/clone-detection#readme",
+  "dependencies": {
+    "babel-eslint": "^9.0.0"
+  }
 }
