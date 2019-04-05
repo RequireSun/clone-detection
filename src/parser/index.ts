@@ -1,10 +1,9 @@
 import { parseNoPatch } from 'babel-eslint';
 
-
 export default {
     locationProps: new Set(['loc', 'start', 'end', 'range']),
 
-    parse(parser, code) {
+    parse(code: string) {
         const opts = {
             sourceType: 'module',
         };
@@ -14,7 +13,7 @@ export default {
         return ast;
     },
 
-    nodeToRange(node) {
+    nodeToRange(node: { [prop: string]: any }) {
         if (typeof node.start !== 'undefined') {
             return [node.start, node.end];
         }

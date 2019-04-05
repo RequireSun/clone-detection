@@ -62,3 +62,7 @@ typings/
 
 # IDE ignores
 .idea
+
+# generated codes
+build
+dist
