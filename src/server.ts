@@ -1,5 +1,7 @@
+import { resolve as pathResolve } from 'path';
+import { readFileSync } from 'fs';
 import * as http from 'http';
-import { parse } from './parser';
+import { parse, flatten } from './parser';
 
 const PORT = process.env.PORT || 3000;
 
@@ -7,13 +9,13 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     console.log("create a server...");
     response.writeHead(200, {'Content-Type': 'application/json'});
 
-    const ast = parse('alert(123)');
+    const fileData = readFileSync(pathResolve(__dirname, '../test-case/helloWorld.js'), { encoding: 'utf-8' });
+    const ast = parse(fileData);
 
-    response.write(JSON.stringify(ast));
+    response.write(JSON.stringify(flatten(ast)));
     response.end();
 });
 
 server.listen(PORT, function () {
     console.log(`Server listening on port ${PORT}`);
-    console.log("test...");
 });

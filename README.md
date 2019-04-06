@@ -36,3 +36,5 @@ A: 用 `node --require ts-node/register` 运行 node, 然后在 node 上加 `ins
 Q: nodemon 重新加载的时候 chrome 的 inspect ws 长连接没有断开, 导致重启 node 进程时 9229 调试端口被占用, 如何解决?
 
 A: 加入 `kill-port` 包, 在运行 node 前先 kill 一下对应的端口
+
+   [https://github.com/remy/nodemon/issues/1050#issuecomment-323680697](https://github.com/remy/nodemon/issues/1050#issuecomment-323680697)
