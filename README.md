@@ -26,3 +26,9 @@ A: 使用 nodemon 结合 ts-node 实现, 不要用辣鸡 supervisor
    [https://medium.com/aherforth/how-to-get-auto-restart-and-breakpoint-support-with-typescript-and-node-5af589dd8687](https://medium.com/aherforth/how-to-get-auto-restart-and-breakpoint-support-with-typescript-and-node-5af589dd8687)
 
 Q: 如何使用 chrome 调试工具打断点
+
+A: 用 `node --require ts-node/register` 运行 node, 然后在 node 上加 `inspect` 参数就行了, 我抄了下下面这个博文
+
+   __记得一定要关掉 TSW__
+   
+   [https://hackernoon.com/debugging-javascript-typescript-node-apps-with-chrome-devtools-vs-code-and-webstorm-97b882aee0ad](https://hackernoon.com/debugging-javascript-typescript-node-apps-with-chrome-devtools-vs-code-and-webstorm-97b882aee0ad)
