@@ -9,7 +9,8 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     console.log("create a server...");
     response.writeHead(200, {'Content-Type': 'application/json'});
 
-    const fileData = readFileSync(pathResolve(__dirname, '../test-case/helloWorld.js'), { encoding: 'utf-8' });
+    // const fileData = readFileSync(pathResolve(__dirname, '../test-case/helloWorld.js'), { encoding: 'utf-8' });
+    const fileData = readFileSync(pathResolve(__dirname, '../test-case/qqDevtools/10.42d40f17624b7b8e837d.js'), { encoding: 'utf-8' });
     const ast = parse(fileData);
 
     response.write(JSON.stringify(flatten(ast)));
