@@ -1,5 +1,6 @@
 /// <reference types="../types/babel-eslint" />
-import { parseNoPatch } from 'babel-eslint';
+// import { parseNoPatch } from 'babel-eslint';
+import { parseNoPatch } from '../../libs/babel-eslint/lib/index';
 import { ParserOptions } from '@babel/parser';
 import { BaseNode, FunctionExpression } from '@babel/types'
 
