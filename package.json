@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --config nodemon.json",
-    "start": "ts-node --project tsconfig.json src/server.ts",
+    "start": "node --inspect-brk --require ts-node/register src/server.ts",
     "build": "tsc"
   },
   "repository": {
