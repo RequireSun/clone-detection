@@ -3,7 +3,7 @@
  */
 declare module 'babel-eslint' {
     import { File } from '@babel/types';
-    import { ParserOptions } from '@babel/parser';
+    import { ParserOptions } from '../../libs/babel-parser';
 
     function parseNoPatch(input: string, options?: ParserOptions): File;
 }

@@ -3,6 +3,14 @@ clone-detection
 
 A clone detection tool for javascript.
 
+## 原理
+
+`babel-eslint` 依赖 `@babel/parser` 实现 AST 树解析功能, `@babel/parser` 中的 Parser 是通过对 node 节点类进行包装而成的, 所以可以从参数内透传 list 进去, 在每次节点生成时直接将新生成的节点插入到这个 list 当中, 进而生成整段代码的节点列表.
+
+后面再根据这个列表生成它和他们子的摘要即可.
+
+将这个代码的摘要列表生成成一个文件, 再对不同代码的文件进行对比, 算出相似度, 应该就 ok 了.
+
 ## 参考
 
 [GitHub: AST explorer](https://github.com/fkling/astexplorer)

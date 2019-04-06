@@ -4,6 +4,7 @@ var babylonToEspree = require("./babylon-to-espree");
 /**
  * @EDITED by kelvinsun
  * @EDITED date 2019-04-06
+ * 引入进来就是为了修改依赖的, 不对代码进行大改
  */
 // var parse = require("@babel/parser").parse;
 // var tt = require("@babel/parser").tokTypes;
@@ -56,6 +57,15 @@ module.exports = function(code, options) {
       "logicalAssignment",
     ],
   };
+
+  /**
+   * @EDITED by kelvinsun
+   * @EDITED date 2019-04-06
+   * 为了透传 list 参数
+   */
+  if (Array.isArray(options.list)) {
+    opts.list = options.list;
+  }
 
   var ast;
   try {

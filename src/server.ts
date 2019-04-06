@@ -1,7 +1,7 @@
 import { resolve as pathResolve } from 'path';
 import { readFileSync } from 'fs';
 import * as http from 'http';
-import { parse, flatten } from './parser';
+import ASTParser from './parser';
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,9 +11,11 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
 
     // const fileData = readFileSync(pathResolve(__dirname, '../test-case/helloWorld.js'), { encoding: 'utf-8' });
     const fileData = readFileSync(pathResolve(__dirname, '../test-case/qqDevtools/10.42d40f17624b7b8e837d.js'), { encoding: 'utf-8' });
-    const ast = parse(fileData);
 
-    response.write(JSON.stringify(flatten(ast)));
+    const ast = new ASTParser(fileData);
+    ast.execute();
+
+    response.write(JSON.stringify(ast.list));
     response.end();
 });
 

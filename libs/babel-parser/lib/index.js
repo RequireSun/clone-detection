@@ -3627,6 +3627,12 @@ var jsx = (superClass => class extends superClass {
 });
 
 const defaultOptions = {
+  /**
+   * @EDITED by kelvinsun
+   * @EDITED date 2019-04-06
+   * 这个会把我的参数过滤掉
+   */
+  list: undefined,
   sourceType: "script",
   sourceFilename: undefined,
   startLine: 1,
@@ -5244,6 +5250,21 @@ class Node {
 }
 
 class NodeUtils extends UtilParser {
+  /**
+   * @EDITED by kelvinsun
+   * @EDITED date 2019-04-06
+   * 把 node 记录到传入的 list 中
+   * @param options
+   * @param input
+   */
+  constructor(options, input) {
+    super(options, input);
+
+    if (options.list) {
+        this.list = options.list;
+    }
+  }
+
   startNode() {
     return new Node(this, this.state.start, this.state.startLoc);
   }
@@ -5257,7 +5278,6 @@ class NodeUtils extends UtilParser {
   }
 
   finishNode(node, type) {
-    console.log('finish node!', type, node);
     return this.finishNodeAt(node, type, this.state.lastTokEnd, this.state.lastTokEndLoc);
   }
 
@@ -5267,6 +5287,14 @@ class NodeUtils extends UtilParser {
     node.loc.end = loc;
     if (this.options.ranges) node.range[1] = pos;
     this.processComment(node);
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-06
+     * 把 node 记录到传入的 list 中
+     */
+    if (Array.isArray(this.list)) {
+        this.list.push(node);
+    }
     return node;
   }
 
