@@ -1,3 +1,4 @@
+/// <reference types="../types/babel-eslint" />
 import { parseNoPatch } from 'babel-eslint';
 import { ParserOptions } from '@babel/parser';
 
