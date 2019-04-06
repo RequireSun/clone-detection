@@ -10,5 +10,6 @@
     "src"
   ],
   "exec": "npm start",
-  "ext": "ts"
+  "ext": "ts",
+  "delay": "80ms"
 }

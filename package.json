@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --config nodemon.json",
-    "start": "node --inspect-brk --require ts-node/register src/server.ts",
+    "start": "kill-port --port 9229 && node --inspect=0.0.0.0:9229 --require ts-node/register src/server.ts",
     "build": "tsc"
   },
   "repository": {
@@ -25,6 +25,7 @@
     "typescript": "^3.4.1"
   },
   "devDependencies": {
+    "kill-port": "^1.3.2",
     "nodemon": "^1.18.10"
   }
 }
