@@ -2,7 +2,7 @@
 // import { parseNoPatch } from 'babel-eslint';
 // import { ParserOptions } from '@babel/parser';
 import { parseNoPatch, ParserOptions } from '../../libs/babel-eslint/lib/index';
-import { BaseNode } from '@babel/types'
+import { BaseNode } from '@babel/types';
 
 export const locationProps = new Set([
     'loc',
