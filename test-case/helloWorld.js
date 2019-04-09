@@ -26,4 +26,4 @@ const gat = 'gat';
 
 const or = 'or';
 
-console.log(window['navi' + gat + or].userAgent);
+console.log(window['navi' + gat + or].userAgent, 'wtf', 'yes commander');

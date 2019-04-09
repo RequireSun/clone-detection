@@ -6106,43 +6106,43 @@ class ExpressionParser extends LValParser {
        * @EDITED date 2019-04-09
        * 方括号的属性读取
        */
-        switch (node.object.type) {
-            case 'MemberExpression': {
-                // 如果是另一个点点点表达式, 那就读取它的内容, 没有就算我这里跳过
-                if (!node.object.detectionValue) {
-                    // 可能是漏掉什么了, 导致没有值填入
-                    break;
-                }
-                switch (node.property.type) {
-                    case 'Identifier': {
-                        // 如果是个变量, 就方框里填进去
-                        node.detectionValue = `${node.object.detectionValue}[${node.property.name}]`;
-                        break;
-                    }
-                    case 'Literal': {
-                        // 如果是个字面量, 就把原值填进去 (带引号的那种)
-                        node.detectionValue = `${node.object.detectionValue}[${node.property.raw}]`;
-                        break;
-                    }
-                }
-                break;
-            }
-            case 'Identifier': {
-                switch (node.property.type) {
-                    case 'Identifier': {
-                        // 如果是个变量, 就方框里填进去
-                        node.detectionValue = `${node.object.name}[${node.property.name}]`;
-                        break;
-                    }
-                    case 'Literal': {
-                        // 如果是个字面量, 就把原值填进去 (带引号的那种)
-                        node.detectionValue = `${node.object.name}[${node.property.raw}]`;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
+      switch (node.object.type) {
+          case 'MemberExpression': {
+              // 如果是另一个点点点表达式, 那就读取它的内容, 没有就算我这里跳过
+              if (!node.object.detectionValue) {
+                  // 可能是漏掉什么了, 导致没有值填入
+                  break;
+              }
+              switch (node.property.type) {
+                  case 'Identifier': {
+                      // 如果是个变量, 就方框里填进去
+                      node.detectionValue = `${node.object.detectionValue}[${node.property.name}]`;
+                      break;
+                  }
+                  case 'Literal': {
+                      // 如果是个字面量, 就把原值填进去 (带引号的那种)
+                      node.detectionValue = `${node.object.detectionValue}[${node.property.raw}]`;
+                      break;
+                  }
+              }
+              break;
+          }
+          case 'Identifier': {
+              switch (node.property.type) {
+                  case 'Identifier': {
+                      // 如果是个变量, 就方框里填进去
+                      node.detectionValue = `${node.object.name}[${node.property.name}]`;
+                      break;
+                  }
+                  case 'Literal': {
+                      // 如果是个字面量, 就把原值填进去 (带引号的那种)
+                      node.detectionValue = `${node.object.name}[${node.property.raw}]`;
+                      break;
+                  }
+              }
+              break;
+          }
+      }
       return this.finishNode(node, "MemberExpression");
     } else if (!noCalls && this.match(types.parenL)) {
       const oldMaybeInArrowParameters = this.state.maybeInArrowParameters;
@@ -6216,6 +6216,47 @@ class ExpressionParser extends LValParser {
       if (importArg && importArg.type === "SpreadElement") {
         this.raise(importArg.start, "... is not allowed in import()");
       }
+    }
+
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * @TODO call 函数多层嵌套问题需要解决
+     */
+    const args = [];
+    let valid = true;
+
+    switch (node.callee.type) {
+        case 'Identifier':
+        // 直接就是名字
+        case 'MemberExpression': {
+        // 应对点点点的情况
+            for (let i = 0, l = node.arguments.length; i < l; ++i) {
+                switch (node.arguments[i].type) {
+                    case 'Identifier': {
+                        if (undefined === node.arguments[i].detectionValue) {
+                            valid = false;
+                            break;
+                        }
+                        args.push(node.arguments[i].detectionValue);
+                        break;
+                    }
+                    case 'Literal': {
+                        if (undefined === node.arguments[i].detectionValue) {
+                            valid = false;
+                            break;
+                        }
+                        args.push(node.arguments[i].detectionValue);
+                        break;
+                    }
+                }
+            }
+
+            if (valid && node.callee.detectionValue) {
+              node.detectionValue = `${node.callee.detectionValue}(${args.join(', ')})`;
+            }
+            break;
+        }
     }
 
     return this.finishNode(node, "CallExpression");
@@ -7673,6 +7714,9 @@ class StatementParser extends ExpressionParser {
       node.callee = expr;
       node.arguments = this.parseCallExpressionArguments(types.parenR, false);
       this.toReferencedList(node.arguments);
+      /**
+       * @TODO 装饰器日后再说
+       */
       return this.finishNode(node, "CallExpression");
     }
 
