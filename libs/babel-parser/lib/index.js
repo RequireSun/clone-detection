@@ -6249,6 +6249,10 @@ class ExpressionParser extends LValParser {
                         args.push(node.arguments[i].detectionValue);
                         break;
                     }
+                    default: {
+                      valid = false;
+                      break;
+                    }
                 }
             }
 
