@@ -2131,6 +2131,7 @@ var flow = (superClass => class extends superClass {
                 if (undefined !== node.test.detectionValue && undefined !== node.consequent.detectionValue && undefined !== node.alternate.detectionValue) {
                     // 三目运算符永远都不可能缺少一个条件
                     node.detectionValue = `${node.test.detectionValue}?(${node.consequent.detectionValue}):(${node.alternate.detectionValue})`;
+                    node.blockListValue = ['ConditionalExpression', node.test.detectionValue, '?', node.consequent.detectionValue, ':', node.alternate.detectionValue];
                 }
                 break;
             }
@@ -5893,6 +5894,7 @@ class ExpressionParser extends LValParser {
         /**
          * @EDITED by kelvinsun
          * @EDITED date 2019-04-09
+         * 二元运算符不赋值也没有结果, 不标记类型
          * @TODO 先不管逻辑运算符了
          * @TODO 这里也需要极致聚拢效果
          */
@@ -5900,7 +5902,8 @@ class ExpressionParser extends LValParser {
             case 'BinaryExpression': {
               // 二元运算符
               if (undefined !== node.left.detectionValue && undefined !== node.right.detectionValue) {
-                node.detectionValue = `${node.left.detectionValue}${node.operator}${node.right.detectionValue}`
+                node.detectionValue = `${node.left.detectionValue}${node.operator}${node.right.detectionValue}`;
+                node.blockListValue = [...node.left.blockListValue, node.operator, ...node.right.blockListValue];
               }
               break;
             }
@@ -6071,6 +6074,7 @@ class ExpressionParser extends LValParser {
        * @EDITED by kelvinsun
        * @EDITED date 2019-04-09
        * 点的属性读取
+       * 属性读取不是最终结果, 不需要在链中标示
        * @TODO 既然这里已经做好了, 那就需要搞个函数, 把重复的变量声明给干掉
        * @TODO 可以考虑做个 isCover 函数, 把点点点 cover 住的的所有变量全都干掉
        */
@@ -6085,6 +6089,7 @@ class ExpressionParser extends LValParser {
                   case 'Identifier': {
                       // 点属性下一个一定是个变量, 不是的话可能我又漏了, 就让他通过, 方便查找
                       node.detectionValue = `${node.object.detectionValue}.${node.property.name}`;
+                      node.blockListValue = [...node.object.blockListValue, '.', node.property.name];
                       break;
                   }
               }
@@ -6095,6 +6100,7 @@ class ExpressionParser extends LValParser {
                   case 'Identifier': {
                       // 点属性下一个一定是个变量, 不是的话可能我又漏了, 就让他通过, 方便查找
                       node.detectionValue = `${node.object.name}.${node.property.name}`;
+                      node.blockListValue = [node.object.name, '.', node.property.name];
                       break;
                   }
               }
@@ -6118,6 +6124,7 @@ class ExpressionParser extends LValParser {
        * @EDITED by kelvinsun
        * @EDITED date 2019-04-09
        * 方括号的属性读取
+       * 属性读取不是最终结果, 不需要在链中标示
        */
       switch (node.object.type) {
           case 'MemberExpression': {
@@ -6130,11 +6137,13 @@ class ExpressionParser extends LValParser {
                   case 'Identifier': {
                       // 如果是个变量, 就方框里填进去
                       node.detectionValue = `${node.object.detectionValue}[${node.property.name}]`;
+                      node.blockListValue = [...node.object.blockListValue, '[', node.property.name, ']'];
                       break;
                   }
                   case 'Literal': {
                       // 如果是个字面量, 就把原值填进去 (带引号的那种)
                       node.detectionValue = `${node.object.detectionValue}[${node.property.raw}]`;
+                      node.blockListValue = [...node.object.blockListValue, '[', node.property.raw, ']'];
                       break;
                   }
               }
@@ -6145,11 +6154,13 @@ class ExpressionParser extends LValParser {
                   case 'Identifier': {
                       // 如果是个变量, 就方框里填进去
                       node.detectionValue = `${node.object.name}[${node.property.name}]`;
+                      node.blockListValue = [node.object.name, '[', node.property.name, ']'];
                       break;
                   }
                   case 'Literal': {
                       // 如果是个字面量, 就把原值填进去 (带引号的那种)
                       node.detectionValue = `${node.object.name}[${node.property.raw}]`;
+                      node.blockListValue = [node.object.name, '[', node.property.raw, ']'];
                       break;
                   }
               }
@@ -6158,20 +6169,20 @@ class ExpressionParser extends LValParser {
       }
       return this.finishNode(node, "MemberExpression");
     } else if (!noCalls && this.match(types.parenL)) {
-      const oldMaybeInArrowParameters = this.state.maybeInArrowParameters;
-      const oldYieldPos = this.state.yieldPos;
-      const oldAwaitPos = this.state.awaitPos;
-      this.state.maybeInArrowParameters = true;
-      this.state.yieldPos = 0;
-      this.state.awaitPos = 0;
-      this.next();
-      let node = this.startNodeAt(startPos, startLoc);
-      node.callee = base;
-      const oldCommaAfterSpreadAt = this.state.commaAfterSpreadAt;
-      this.state.commaAfterSpreadAt = -1;
-      node.arguments = this.parseCallExpressionArguments(types.parenR, maybeAsyncArrow, base.type === "Import", base.type !== "Super");
+        const oldMaybeInArrowParameters = this.state.maybeInArrowParameters;
+        const oldYieldPos = this.state.yieldPos;
+        const oldAwaitPos = this.state.awaitPos;
+        this.state.maybeInArrowParameters = true;
+        this.state.yieldPos = 0;
+        this.state.awaitPos = 0;
+        this.next();
+        let node = this.startNodeAt(startPos, startLoc);
+        node.callee = base;
+        const oldCommaAfterSpreadAt = this.state.commaAfterSpreadAt;
+        this.state.commaAfterSpreadAt = -1;
+        node.arguments = this.parseCallExpressionArguments(types.parenR, maybeAsyncArrow, base.type === "Import", base.type !== "Super");
 
-      if (!state.optionalChainMember) {
+        if (!state.optionalChainMember) {
         this.finishCallExpression(node);
       } else {
         this.finishOptionalCallExpression(node);
@@ -6234,6 +6245,7 @@ class ExpressionParser extends LValParser {
     /**
      * @EDITED by kelvinsun
      * @EDITED date 2019-04-09
+     * 函数调用语句
      * @TODO call 函数多层嵌套问题需要解决
      */
     const args = [];
@@ -6265,6 +6277,21 @@ class ExpressionParser extends LValParser {
 
             if (valid && node.callee.detectionValue) {
               node.detectionValue = `${node.callee.detectionValue}(${args.join(', ')})`;
+
+              // 函数调用整体比较复杂, 估计摊到 block 里面也是好大一坨, 有点头疼
+              if ('MemberExpression' === node.callee.type) {
+                  node.blockListValue = ['CallExpression', ...node.callee.blockListValue];
+              } else {
+                  // 其实就是名字, 我只是忘记结构了, 就这么写了吧
+                  node.blockListValue = ['CallExpression', node.callee.detectionValue];
+              }
+              node.blockListValue.push('(');
+
+              for (let i = 0, l = args.length; i < l; ++i) {
+                  node.blockListValue.push(args[i], ',')
+              }
+
+              node.blockListValue.push(')');
             }
             break;
         }
@@ -6619,6 +6646,8 @@ class ExpressionParser extends LValParser {
      * 但是也要注意过滤掉 true false 1 0 这种常用值
      */
     node.detectionValue = `${this.input.slice(node.start, this.state.lastTokEnd)}`;
+    // 这个就直接是值就 ok 了
+    node.blockListValue = [type, node.detectionValue];
     return this.finishNode(node, type);
   }
 
@@ -7199,8 +7228,10 @@ class ExpressionParser extends LValParser {
      * 唯一有意义的是系统 API 的调用频次
      * 唯一的问题是, 我怎么把这玩意连成一个整体? console.log 会被拆成 console & log
      * @TODO 放弃了, 后期手动拼吧, 可以暂时整个 set, 每次读到新的变量就检查下是否正好跟已有的链接起来可以形成新的变量
+     * 这个是个独立的原子, 真正的整体可能是那个点点点
      */
     node.detectionValue = `${this.input.slice(node.start, this.state.lastTokEnd)}`;
+    node.blockListValue = ['Identifier', node.detectionValue];
     return this.finishNode(node, "Identifier");
   }
 
@@ -8051,6 +8082,7 @@ class StatementParser extends ExpressionParser {
      */
     if (undefined !== node.expression && undefined !== node.expression.detectionValue) {
       node.detectionValue = node.expression.detectionValue;
+      node.blockListValue = node.expression.blockListValue;
     }
     return this.finishNode(node, "ExpressionStatement");
   }
@@ -8067,6 +8099,26 @@ class StatementParser extends ExpressionParser {
 
     if (createNewLexicalScope) {
       this.scope.exit();
+    }
+
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * 只是简单的把每一条加进来了
+     */
+    const list = [];
+    let valid = true;
+
+    for (let i = 0, l = node.body; i < l; ++i) {
+        if (undefined !== node.body.blockListValue) {
+            list.push(node.body.blockListValue);
+        } else {
+            valid = false;
+        }
+    }
+
+    if (valid) {
+        node.blockListValue = list;
     }
 
     return this.finishNode(node, "BlockStatement");

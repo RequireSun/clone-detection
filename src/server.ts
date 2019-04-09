@@ -2,12 +2,16 @@ import { resolve as pathResolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import * as http from 'http';
 import ASTParser from './parser';
-import { BaseNode, SourceLocation } from '@babel/types';
+import { BaseNode, SourceLocation, BlockStatement } from '@babel/types/wrapped';
 // , Identifier, VariableDeclaration, VariableDeclarator, BlockStatement, FunctionDeclaration, FunctionExpression, Statement
 
 const PORT = process.env.PORT || 3000;
 // const FILE = 'qqDevtools/10.42d40f17624b7b8e837d';
 const FILE = 'helloWorld';
+
+/**
+ * @TODO 还有点问题, 就是应该要把内容中的 \t 之类的转义了, 要不然存的数据就炸了
+ */
 
 const server = http.createServer(function (request: http.IncomingMessage, response: http.ServerResponse): void {
     console.log("create a server...");
@@ -102,7 +106,8 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     // });
 
     writeFileSync(pathResolve(__dirname, '../dist/', `${FILE}.txt`), ast.list.map((astItem: BaseNode) => {
-        if (astItem.detectionValue) {
+        // 有 detectionValue 是必须的, 如果是 blockStatement 的话, 必须要有 list value
+        if (astItem.detectionValue && ('BlockStatement' !== astItem.type || astItem.blockListValue)) {
             const loc: SourceLocation = astItem.loc || { start: { line: 0, column: 0 }, end: { line: 0, column: 0 }};
             // 本段类型
             let line = `${astItem.type}\t`;
@@ -110,8 +115,17 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
             line += `${astItem.start},${astItem.end}\t`;
             // 本段的行列起止位置
             line += `${loc.start.line}:${loc.start.column},${loc.end.line}:${loc.end.column}\t`;
-            // 我自制的查重 key
-            line += astItem.detectionValue;
+            if ('BlockStatement' === astItem.type) {
+                // 前面校验过了, BlockStatement 一定有 blockListValue
+                // 分隔符:
+                // \2: 正文开始
+                // \3: 正文结束
+                // \7: 响铃
+                line += '\u0002' + (astItem as BlockStatement).blockListValue!.map((blockLine: string[]) => blockLine.join('\u0007')).join('\u0003\u0002') + '\u0003';
+            } else {
+                // 我自制的查重 key
+                line += astItem.detectionValue;
+            }
 
             return line + '\r\n';
         } else {

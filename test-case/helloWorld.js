@@ -13,6 +13,7 @@ if (true) {
 }
 
 false ? console.info(777) : console.warn(222);
+window.wx ? console.log(557) : console.log(887);
 
 if ('test' === helloWorld('test')) {
     console.log(555);
