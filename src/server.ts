@@ -2,17 +2,18 @@ import { resolve as pathResolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import * as http from 'http';
 import ASTParser from './parser';
-import { BaseNode } from '@babel/types';
-// , SourceLocation, Identifier, VariableDeclaration, VariableDeclarator, BlockStatement, FunctionDeclaration, FunctionExpression, Statement
+import { BaseNode, SourceLocation } from '@babel/types';
+// , Identifier, VariableDeclaration, VariableDeclarator, BlockStatement, FunctionDeclaration, FunctionExpression, Statement
 
 const PORT = process.env.PORT || 3000;
+// const FILE = 'qqDevtools/10.42d40f17624b7b8e837d';
+const FILE = 'helloWorld';
 
 const server = http.createServer(function (request: http.IncomingMessage, response: http.ServerResponse): void {
     console.log("create a server...");
     response.writeHead(200, {'Content-Type': 'application/json'});
 
-    // const fileData = readFileSync(pathResolve(__dirname, '../test-case/helloWorld.js'), { encoding: 'utf-8' });
-    const fileData = readFileSync(pathResolve(__dirname, '../test-case/qqDevtools/10.42d40f17624b7b8e837d.js'), { encoding: 'utf-8' });
+    const fileData = readFileSync(pathResolve(__dirname, '../test-case/', `${FILE}.js`), { encoding: 'utf-8' });
 
     const ast = new ASTParser(fileData);
     ast.execute();
@@ -100,8 +101,22 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     //     encoding: 'utf-8',
     // });
 
-    writeFileSync(pathResolve(__dirname, '../dist/qqDevtools/10.42d40f17624b7b8e837d.txt'), ast.list.map((astItem: BaseNode) => {
-        return JSON.stringify(astItem) + '\r\n';
+    writeFileSync(pathResolve(__dirname, '../dist/', `${FILE}.txt`), ast.list.map((astItem: BaseNode) => {
+        if (astItem.detectionValue) {
+            const loc: SourceLocation = astItem.loc || { start: { line: 0, column: 0 }, end: { line: 0, column: 0 }};
+            // 本段类型
+            let line = `${astItem.type}\t`;
+            // 本段起止位置
+            line += `${astItem.start},${astItem.end}\t`;
+            // 本段的行列起止位置
+            line += `${loc.start.line}:${loc.start.column},${loc.end.line}:${loc.end.column}\t`;
+            // 我自制的查重 key
+            line += astItem.detectionValue;
+
+            return line + '\r\n';
+        } else {
+            return JSON.stringify(astItem) + '\r\n';
+        }
     }).join(''), {
         encoding: 'utf-8',
     });

@@ -827,6 +827,11 @@ var flow = (superClass => class extends superClass {
     return [type, predicate];
   }
 
+  /**
+   * @TODO flow 不管
+   * @param node
+   * @returns {*}
+   */
   flowParseDeclareClass(node) {
     this.next();
     this.flowParseInterfaceish(node, true);
@@ -968,6 +973,9 @@ var flow = (superClass => class extends superClass {
       }
 
       node.default = true;
+      /**
+       * @TODO flow 不管
+       */
       return this.finishNode(node, "DeclareExportDeclaration");
     } else {
       if (this.match(types._const) || this.isLet() || (this.isContextual("type") || this.isContextual("interface")) && !insideModule) {
@@ -979,6 +987,9 @@ var flow = (superClass => class extends superClass {
       if (this.match(types._var) || this.match(types._function) || this.match(types._class) || this.isContextual("opaque")) {
           node.declaration = this.flowParseDeclare(this.startNode());
           node.default = false;
+          /**
+           * @TODO flow 不管
+           */
           return this.finishNode(node, "DeclareExportDeclaration");
         } else if (this.match(types.star) || this.match(types.braceL) || this.isContextual("interface") || this.isContextual("type") || this.isContextual("opaque")) {
           node = this.parseExport(node);
@@ -1663,6 +1674,9 @@ var flow = (superClass => class extends superClass {
     };
   }
 
+  /**
+   * @TODO flow 先不管了
+   */
   flowIdentToTypeAnnotation(startPos, startLoc, node, id) {
     switch (id.name) {
       case "any":
@@ -1864,6 +1878,9 @@ var flow = (superClass => class extends superClass {
     }
   }
 
+  /**
+   * @TODO flow 继续不管
+   */
   flowParseAnonFunctionWithoutParens() {
     const param = this.flowParsePrefixType();
 
@@ -2100,6 +2117,12 @@ var flow = (superClass => class extends superClass {
     node.test = expr;
     node.consequent = consequent;
     node.alternate = this.forwardNoArrowParamsConversionAt(node, () => this.parseMaybeAssign(noIn, undefined, undefined, undefined));
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * 这个是判断语句的处理
+     */
+    console.log('ConditionalExpression', node);
     return this.finishNode(node, "ConditionalExpression");
   }
 
@@ -6445,6 +6468,14 @@ class ExpressionParser extends LValParser {
     this.addExtra(node, "raw", this.input.slice(startPos, this.state.end));
     node.value = value;
     this.next();
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * 这个函数是用来解析字面量的, 不需要特殊操作, 直接记录值就好了
+     * 在很多代码里, 特殊的字面量都是必须固定的, 所以它们的查重作用很大
+     * 但是也要注意过滤掉 true false 1 0 这种常用值
+     */
+    node.detectionValue = `${this.input.slice(node.start, this.state.lastTokEnd)}`;
     return this.finishNode(node, type);
   }
 
@@ -10899,6 +10930,10 @@ var typescript = (superClass => class extends superClass {
 
 });
 
+/**
+ * @TODO 这个 placeholder 是用在哪里的也很奇怪
+ * @type {TokenType}
+ */
 types.placeholder = new TokenType("%%", {
   startsExpr: true
 });
@@ -11000,6 +11035,12 @@ var placeholders = (superClass => class extends superClass {
       } else if (optionalId || !isStatement) {
         node.id = null;
         node.body = this.finishPlaceholder(placeholder, "ClassBody");
+        /**
+         * @EDITED by kelvinsun
+         * @EDITED date 2019-04-09
+         * @TODO 一般压缩后的代码都没有 class, 所以这个地方可能不会路过
+         */
+        console.log(type, node);
         return this.finishNode(node, type);
       } else {
         this.unexpected(null, "A class name is required");
@@ -11010,6 +11051,12 @@ var placeholders = (superClass => class extends superClass {
 
     this.parseClassSuper(node);
     node.body = this.parsePlaceholder("ClassBody") || this.parseClassBody(!!node.superClass);
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * @TODO 一般压缩后的代码都没有 class, 所以这个地方可能不会路过
+     */
+    console.log(type, node);
     return this.finishNode(node, type);
   }
 
