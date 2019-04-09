@@ -13,3 +13,15 @@ if (true) {
 }
 
 false ? console.info(777) : console.warn(222);
+
+console.log(window.navigator.userAgent);
+
+console.log(window['location'].href);
+
+const href = 'href';
+
+console.log(window['location'][href]);
+
+const gator = 'gator';
+
+console.log(window['navi' + gator].userAgent);

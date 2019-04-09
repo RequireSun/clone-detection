@@ -6039,6 +6039,40 @@ class ExpressionParser extends LValParser {
         return this.finishNode(node, "OptionalMemberExpression");
       }
 
+      /**
+       * @EDITED by kelvinsun
+       * @EDITED date 2019-04-09
+       * 点的属性读取
+       * @TODO 既然这里已经做好了, 那就需要搞个函数, 把重复的变量声明给干掉
+       * @TODO 可以考虑做个 isCover 函数, 把点点点 cover 住的的所有变量全都干掉
+       */
+      switch (node.object.type) {
+          case 'MemberExpression': {
+              // 如果是另一个点点点表达式, 那就读取它的内容, 没有就算我这里跳过
+              if (!node.object.detectionValue) {
+                  // 可能是漏掉什么了, 导致没有值填入
+                  break;
+              }
+              switch (node.property.type) {
+                  case 'Identifier': {
+                      // 点属性下一个一定是个变量, 不是的话可能我又漏了, 就让他通过, 方便查找
+                      node.detectionValue = `${node.object.detectionValue}.${node.property.name}`;
+                      break;
+                  }
+              }
+              break;
+          }
+          case 'Identifier': {
+              switch (node.property.type) {
+                  case 'Identifier': {
+                      // 点属性下一个一定是个变量, 不是的话可能我又漏了, 就让他通过, 方便查找
+                      node.detectionValue = `${node.object.name}.${node.property.name}`;
+                      break;
+                  }
+              }
+              break;
+          }
+      }
       return this.finishNode(node, "MemberExpression");
     } else if (this.eat(types.bracketL)) {
       const node = this.startNodeAt(startPos, startLoc);
@@ -6052,6 +6086,48 @@ class ExpressionParser extends LValParser {
         return this.finishNode(node, "OptionalMemberExpression");
       }
 
+      /**
+       * @EDITED by kelvinsun
+       * @EDITED date 2019-04-09
+       * 方括号的属性读取
+       */
+        switch (node.object.type) {
+            case 'MemberExpression': {
+                // 如果是另一个点点点表达式, 那就读取它的内容, 没有就算我这里跳过
+                if (!node.object.detectionValue) {
+                    // 可能是漏掉什么了, 导致没有值填入
+                    break;
+                }
+                switch (node.property.type) {
+                    case 'Identifier': {
+                        // 如果是个变量, 就方框里填进去
+                        node.detectionValue = `${node.object.detectionValue}[${node.property.name}]`;
+                        break;
+                    }
+                    case 'Literal': {
+                        // 如果是个字面量, 就把原值填进去 (带引号的那种)
+                        node.detectionValue = `${node.object.detectionValue}[${node.property.raw}]`;
+                        break;
+                    }
+                }
+                break;
+            }
+            case 'Identifier': {
+                switch (node.property.type) {
+                    case 'Identifier': {
+                        // 如果是个变量, 就方框里填进去
+                        node.detectionValue = `${node.object.name}[${node.property.name}]`;
+                        break;
+                    }
+                    case 'Literal': {
+                        // 如果是个字面量, 就把原值填进去 (带引号的那种)
+                        node.detectionValue = `${node.object.name}[${node.property.raw}]`;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
       return this.finishNode(node, "MemberExpression");
     } else if (!noCalls && this.match(types.parenL)) {
       const oldMaybeInArrowParameters = this.state.maybeInArrowParameters;
@@ -7049,6 +7125,15 @@ class ExpressionParser extends LValParser {
   createIdentifier(node, name) {
     node.name = name;
     node.loc.identifierName = name;
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * 这个是变量声明的处理, 应该是要弱于字面量的, 因为压缩后用户声明的值基本上全都一个样了
+     * 唯一有意义的是系统 API 的调用频次
+     * 唯一的问题是, 我怎么把这玩意连成一个整体? console.log 会被拆成 console & log
+     * @TODO 放弃了, 后期手动拼吧, 可以暂时整个 set, 每次读到新的变量就检查下是否正好跟已有的链接起来可以形成新的变量
+     */
+    node.detectionValue = `${this.input.slice(node.start, this.state.lastTokEnd)}`;
     return this.finishNode(node, "Identifier");
   }
 
@@ -7551,6 +7636,9 @@ class StatementParser extends ExpressionParser {
           node.object = expr;
           node.property = this.parseIdentifier(true);
           node.computed = false;
+          /**
+           * @TODO decorator 还有 memberExpression...
+           */
           expr = this.finishNode(node, "MemberExpression");
         }
       }
