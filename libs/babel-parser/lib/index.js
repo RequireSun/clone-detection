@@ -6246,15 +6246,9 @@ class ExpressionParser extends LValParser {
         // 应对点点点的情况
             for (let i = 0, l = node.arguments.length; i < l; ++i) {
                 switch (node.arguments[i].type) {
-                    case 'Identifier': {
-                        if (undefined === node.arguments[i].detectionValue) {
-                            valid = false;
-                            break;
-                        }
-                        args.push(node.arguments[i].detectionValue);
-                        break;
-                    }
-                    case 'Literal': {
+                    case 'Identifier':
+                    case 'Literal':
+                    case 'MemberExpression': {
                         if (undefined === node.arguments[i].detectionValue) {
                             valid = false;
                             break;
