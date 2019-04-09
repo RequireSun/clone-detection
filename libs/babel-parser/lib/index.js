@@ -5877,6 +5877,21 @@ class ExpressionParser extends LValParser {
 
         node.right = this.parseExprOpRightExpr(op, prec, noIn);
         this.finishNode(node, op === types.logicalOR || op === types.logicalAND || op === types.nullishCoalescing ? "LogicalExpression" : "BinaryExpression");
+        /**
+         * @EDITED by kelvinsun
+         * @EDITED date 2019-04-09
+         * @TODO 先不管逻辑运算符了
+         * @TODO 这里也需要极致聚拢效果
+         */
+        switch (node.type) {
+            case 'BinaryExpression': {
+              // 二元运算符
+              if (undefined !== node.left.detectionValue && undefined !== node.right.detectionValue) {
+                node.detectionValue = `${node.left.detectionValue}${node.operator}${node.right.detectionValue}`
+              }
+              break;
+            }
+        }
         return this.parseExprOp(node, leftStartPos, leftStartLoc, minPrec, noIn);
       }
     }

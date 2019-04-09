@@ -22,6 +22,8 @@ const href = 'href';
 
 console.log(window['location'][href]);
 
-const gator = 'gator';
+const gat = 'gat';
 
-console.log(window['navi' + gator].userAgent);
+const or = 'or';
+
+console.log(window['navi' + gat + or].userAgent);
