@@ -2117,12 +2117,25 @@ var flow = (superClass => class extends superClass {
     node.test = expr;
     node.consequent = consequent;
     node.alternate = this.forwardNoArrowParamsConversionAt(node, () => this.parseMaybeAssign(noIn, undefined, undefined, undefined));
-    /**
-     * @EDITED by kelvinsun
-     * @EDITED date 2019-04-09
-     * 这个是判断语句的处理
-     */
-    console.log('ConditionalExpression', node);
+
+    if (node) {
+        /**
+         * @EDITED by kelvinsun
+         * @EDITED date 2019-04-09
+         * 三目运算符
+         */
+        switch (node.test.type) {
+            case 'Literal':
+            case 'Identifier': {
+                // 这两种情况都是能直接填的
+                if (undefined !== node.test.detectionValue && undefined !== node.consequent.detectionValue && undefined !== node.alternate.detectionValue) {
+                    // 三目运算符永远都不可能缺少一个条件
+                    node.detectionValue = `${node.test.detectionValue}?(${node.consequent.detectionValue}):(${node.alternate.detectionValue})`;
+                }
+                break;
+            }
+        }
+    }
     return this.finishNode(node, "ConditionalExpression");
   }
 
@@ -8036,6 +8049,15 @@ class StatementParser extends ExpressionParser {
   parseExpressionStatement(node, expr) {
     node.expression = expr;
     this.semicolon();
+
+    /**
+     * @EDITED by kelvinsun
+     * @EDITED date 2019-04-09
+     * 这个东西个人感觉没什么卵用, 就是表示统计下函数调用的返回值
+     */
+    if (undefined !== node.expression && undefined !== node.expression.detectionValue) {
+      node.detectionValue = node.expression.detectionValue;
+    }
     return this.finishNode(node, "ExpressionStatement");
   }
 

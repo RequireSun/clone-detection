@@ -14,6 +14,10 @@ if (true) {
 
 false ? console.info(777) : console.warn(222);
 
+if ('test' === helloWorld('test')) {
+    console.log(555);
+}
+
 console.log(window.navigator.userAgent);
 
 console.log(window['location'].href);
