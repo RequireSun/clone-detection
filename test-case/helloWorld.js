@@ -19,6 +19,8 @@ if ('test' === helloWorld('test')) {
     console.log(555);
 }
 
+console.warn('formatDate: %s', formatDate(Date.now(), 'YYYY/MM/DD'));
+
 console.log(window.navigator.userAgent);
 
 console.log(window['location'].href);
@@ -32,3 +34,13 @@ const gat = 'gat';
 const or = 'or';
 
 console.log(window['navi' + gat + or].userAgent, 'wtf', 'yes commander');
+
+
+function formatDate(date, format) {
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
+
+    return format.replace('YYYY', date.getFullYear()).replace('MM', date.getMonth() + 1).replace('DD', date.getDate());
+}
+

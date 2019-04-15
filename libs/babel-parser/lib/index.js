@@ -8107,17 +8107,20 @@ class StatementParser extends ExpressionParser {
      * 只是简单的把每一条加进来了
      */
     const list = [];
+    const listStr = [];
     let valid = true;
 
-    for (let i = 0, l = node.body; i < l; ++i) {
-        if (undefined !== node.body.blockListValue) {
-            list.push(node.body.blockListValue);
+    for (let i = 0, l = node.body.length; i < l; ++i) {
+        if (undefined !== node.body[i].blockListValue) {
+            list.push(node.body[i].blockListValue);
+            listStr.push(node.body[i].type);
         } else {
             valid = false;
         }
     }
 
     if (valid) {
+        node.detectionValue = listStr.join(',');
         node.blockListValue = list;
     }
 
