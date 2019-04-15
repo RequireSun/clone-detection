@@ -2,7 +2,7 @@ import { resolve as pathResolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import * as http from 'http';
 import ASTParser from './parser';
-import { BaseNode, SourceLocation, BlockStatement } from '@babel/types/wrapped';
+import { BaseNode, SourceLocation, BlockStatement, FunctionDeclaration } from '@babel/types/wrapped';
 // , Identifier, VariableDeclaration, VariableDeclarator, BlockStatement, FunctionDeclaration, FunctionExpression, Statement
 
 const PORT = process.env.PORT || 3000;
@@ -106,8 +106,8 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     // });
 
     writeFileSync(pathResolve(__dirname, '../dist/', `${FILE}.txt`), ast.list.map((astItem: BaseNode) => {
-        // 有 detectionValue 是必须的, 如果是 blockStatement 的话, 必须要有 list value
-        if (astItem.detectionValue && ('BlockStatement' !== astItem.type || astItem.blockListValue)) {
+        // 有 detectionValue 是必须的, 如果是 blockStatement functionDeclaration 的话, 必须要有 list value
+        if (astItem.detectionValue && (('BlockStatement' !== astItem.type && 'FunctionDeclaration' !== astItem.type) || astItem.blockListValue)) {
             const loc: SourceLocation = astItem.loc || { start: { line: 0, column: 0 }, end: { line: 0, column: 0 }};
             // 本段类型
             let line = `${astItem.type}\t`;
@@ -122,6 +122,8 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
                 // \3: 正文结束
                 // \7: 响铃
                 line += '\u0002' + (astItem as BlockStatement).blockListValue!.map((blockLine: string[]) => blockLine.join('\u0007')).join('\u0003\u0002') + '\u0003';
+            } else if ('FunctionDeclaration' === astItem.type) {
+                line += '\u0002' + (astItem as FunctionDeclaration).blockListValue!.map((blockLine: string[]) => blockLine.join('\u0007')).join('\u0003\u0002') + '\u0003';
             } else {
                 // 我自制的查重 key
                 line += astItem.detectionValue;

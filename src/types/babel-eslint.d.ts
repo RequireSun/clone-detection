@@ -36,5 +36,14 @@ declare module '@babel/types/wrapped' {
         blockListValue?: string[][];
     }
 
+    export interface FunctionDeclaration extends BaseBlockStatement {
+        /**
+         * @EDITED by kelvinsun
+         * @EDITED date 2019-04-15
+         * 二维数组, 第一位是每一行, 第二维是每一行具体的内容
+         */
+        blockListValue?: string[][];
+    }
+
     export { SourceLocation } from '@babel/types';
 }

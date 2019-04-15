@@ -7109,6 +7109,33 @@ class ExpressionParser extends LValParser {
 
   parseFunctionBodyAndFinish(node, type, isMethod = false) {
     this.parseFunctionBody(node, false, isMethod);
+      /**
+       * @EDITED by kelvinsun
+       * @EDITED date 2019-04-15
+       * 函数体解析
+       */
+      if ('FunctionDeclaration' === type) {
+        const params = ['Parameters'];
+        let valid = true;
+
+        for (let i = 0, l = node.params.length; i < l; ++i) {
+          if (node.params[i].detectionValue) {
+            params.push(node.params[i].detectionValue);
+          } else {
+            valid = false;
+            break;
+          }
+        }
+
+        // 这个是选填的
+        if (valid && node.body.blockListValue) {
+            node.blockListValue = [params].concat(node.body.blockListValue);
+        }
+        // 这个是必填的
+        if (valid && node.body.detectionValue) {
+            node.detectionValue = `${params.join(',')} ${node.body.detectionValue}`;
+        }
+      }
     this.finishNode(node, type);
   }
 
