@@ -2,7 +2,7 @@ import { resolve as pathResolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import * as http from 'http';
 import ASTParser from './parser';
-import { BaseNode } from '@babel/types';
+// import { BaseNode } from '@babel/types';
 // , SourceLocation, Identifier, VariableDeclaration, VariableDeclarator, BlockStatement, FunctionDeclaration, FunctionExpression, Statement
 
 const PORT = process.env.PORT || 3000;
@@ -100,11 +100,19 @@ const server = http.createServer(function (request: http.IncomingMessage, respon
     //     encoding: 'utf-8',
     // });
 
-    writeFileSync(pathResolve(__dirname, '../dist/qqDevtools/10.42d40f17624b7b8e837d.txt'), ast.list.map((astItem: BaseNode) => {
-        return JSON.stringify(astItem) + '\r\n';
-    }).join(''), {
-        encoding: 'utf-8',
-    });
+    // writeFileSync(pathResolve(__dirname, '../dist/qqDevtools/10.42d40f17624b7b8e837d.txt'), ast.list.map((astItem: BaseNode) => {
+    //     return JSON.stringify(astItem) + '\r\n';
+    // }).join(''), {
+    //     encoding: 'utf-8',
+    // });
+
+    writeFileSync(
+        pathResolve(__dirname, '../dist/qqDevtools/10.42d40f17624b7b8e837d.txt'),
+        JSON.stringify(ast.tree),
+        {
+            encoding: 'utf-8',
+        }
+    );
 
     response.write(JSON.stringify({ size: ast.list.length }));
     response.end();
