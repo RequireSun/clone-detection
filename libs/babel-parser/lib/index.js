@@ -7920,6 +7920,39 @@ class StatementParser extends ExpressionParser {
     node.test = this.parseHeaderExpression();
     node.consequent = this.parseStatement("if");
     node.alternate = this.eat(types._else) ? this.parseStatement("if") : null;
+
+    const list = [];
+    let valid = true;
+
+    if (node.test && node.test.blockListValue) {
+      list.push('Test', node.test.blockListValue);
+    } else {
+      console.log('test');
+      valid = false;
+    }
+
+    if (node.consequent && node.consequent.blockListValue) {
+        list.push('Consequent');
+        Array.prototype.push.apply(list, node.consequent.blockListValue);
+    } else {
+        console.log('consequent');
+        valid = false;
+    }
+
+    if (node.alternate) {
+      if (node.alternate.blockListValue) {
+        list.push('Alternate');
+        Array.prototype.push.apply(list, node.consequent.blockListValue);
+      } else {
+          console.log('alternate');
+          valid = false;
+      }
+    }
+
+    if (valid) {
+        node.blockListValue = list;
+    }
+
     return this.finishNode(node, "IfStatement");
   }
 
