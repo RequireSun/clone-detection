@@ -192,6 +192,7 @@ import {
     WhileStatement,
     WithStatement,
     YieldExpression,
+    Node,
 } from '@babel/types';
 
 export default class Differ {
@@ -206,8 +207,18 @@ export default class Differ {
      */
     public astFlatten: { [key: string]: BaseNode[] } = {};
 
-    execute(code: BaseNode, append?: false) {
+    public astTyped: { [key: string]: { [key in Node["type"]]?: BaseNode[] } };
 
+    execute(code: BaseNode, append?: string) {
+        const flattened: BaseNode[] = this.flatten(code, append);
+        const files: string[] = Object.keys(this.astFlatten);
+        const result: { [key: string]: string } = {};
+
+        for (let i = 0, l = files.length; i < l; ++i) {
+            result[files[i]] = this._loopCompare(flattened, this.astTyped[files[i]]);
+        }
+
+        return result;
     }
 
     flatten(code: BaseNode, append?: string) {
@@ -217,6 +228,7 @@ export default class Differ {
         if (append) {
             this.astOrigin[append] = code;
             this.astFlatten[append] = list;
+            this.astTyped[append] = this._loopTyped(list);
         }
 
         return list;
@@ -1102,5 +1114,41 @@ export default class Differ {
             }
         }
 
+    }
+
+    private _loopTyped(list: BaseNode[]) {
+        const result: { [key in Node["type"]]?: BaseNode[] } = {};
+
+        for (let i = 0, l = list.length; i < l; ++i) {
+            if (!result[list[i].type]) {
+                result[list[i].type] = [];
+            }
+            // ts 智障
+            result[list[i].type]!.push(list[i]);
+        }
+
+        return result;
+    }
+
+    private _loopCompare(target: BaseNode[], sample: { [key in Node["type"]]?: BaseNode[] }) {
+        for (let i = 0, l = target.length; i < l; ++i) {
+            const sampleList = sample[target[i].type];
+
+            if (sampleList) {
+                for (let j = 0, k = sampleList.length; j < k; ++j) {
+                    this._executorCompare(target[i], sampleList[j]);
+                }
+            } else {
+
+            }
+        }
+        return '';
+    }
+
+    private _executorCompare(target: BaseNode, sample: BaseNode) {
+        if (target.type !== sample.type) {
+            throw new Error('types of target and sample not same!');
+        }
+        return '';
     }
 }
