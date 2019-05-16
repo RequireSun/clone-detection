@@ -33,6 +33,10 @@ A clone detection tool for javascript.
 
 [上面项目的主页](https://leons.im/posts/a-python-implementation-of-simhash-algorithm/)
 
+[Diff算法与实现](http://koala.ink/posts/4ee58d50/)
+
+[Git是怎样生成diff的：Myers算法](https://cjting.me/misc/how-git-generate-diff/)
+
 ## 问题修复
 
 Q: TypeScript 自定义类型在 ts-node 下失效
