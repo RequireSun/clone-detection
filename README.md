@@ -15,9 +15,23 @@ A clone detection tool for javascript.
 
 [GitHub: AST explorer](https://github.com/fkling/astexplorer)
 
+[Online Demo: AST explorer](https://astexplorer.net/)
+
+[GitHub: babel-eslint@9](https://github.com/babel/babel-eslint/tree/v9.0.0)
+
 [一种改进的基于抽象语法树的软件源代码比对算法](http://netinfo-security.org/CN/article/downloadArticleFile.do?attachType=PDF&id=3520)
 
 离线版: [一种改进的基于抽象语法树的软件源代码比对算法](reference/一种改进的基于抽象语法树的软件源代码比对算法.pdf)
+
+[使用Typescript开发node.js项目——简单的环境配置](https://segmentfault.com/a/1190000007574276)
+
+[谷歌搜索 simhash](https://www.google.com.hk/search?newwindow=1&safe=strict&ei=h5qpXMHsDcXKmAXDj4Uo&q=simhash&oq=simhash&gs_l=psy-ab.3..0i12l2j0l8.71331.72292..72534...0.0..0.169.524.6j1......0....1..gws-wiz.......0i71j0i67.VHgmQpj7Exk)
+
+[知乎专栏: SimHash算法](https://zhuanlan.zhihu.com/p/32078737)
+
+[GitHub: simhash](https://github.com/leonsim/simhash)
+
+[上面项目的主页](https://leons.im/posts/a-python-implementation-of-simhash-algorithm/)
 
 ## 问题修复
 

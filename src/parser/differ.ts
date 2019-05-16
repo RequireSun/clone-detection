@@ -209,6 +209,72 @@ export default class Differ {
 
     public astTyped: { [key: string]: { [key in Node["type"]]?: BaseNode[] } };
 
+    /**
+     * @TODO 现在只对比类型, 这里以后要更加细化到每个变量内容
+     * @TODO 以后需要优化交集算法
+     * @param {Array<T extends Node>} target
+     * @param {Array<T extends Node>} sample
+     */
+    static differArray<T extends Node | null>(target: Array<T>, sample: Array<T>): number {
+        const typeCountTarget: { [key in Node["type"]]?: number } = {};
+        const typeCountSample: { [key in Node["type"]]?: number } = {};
+
+        for (let i = 0, l = target.length; i < l; ++i) {
+            if (null === target[i]) {
+                if (typeCountTarget['null']) {
+                    ++typeCountTarget['null'];
+                } else {
+                    typeCountTarget['null'] = 1;
+                }
+                // 很智障, 又判断不出来 null 已经被排除了
+            } else if (typeCountTarget[target[i]!.type]) {
+                // 很智障, 又判断不出来 null 已经被排除了
+                ++typeCountTarget[target[i]!.type]!;
+            } else {
+                // 很智障, 又判断不出来 null 已经被排除了
+                typeCountTarget[target[i]!.type] = 1;
+            }
+        }
+
+        for (let i = 0, l = sample.length; i < l; ++i) {
+            if (null === sample[i]) {
+                if (typeCountSample['null']) {
+                    ++typeCountSample['null'];
+                } else {
+                    typeCountSample['null'] = 1;
+                }
+                // 很智障, 又判断不出来 null 已经被排除了
+            } else if (typeCountSample[sample[i]!.type]) {
+                // 很智障, 又判断不出来 null 已经被排除了
+                ++typeCountSample[sample[i]!.type]!;
+            } else {
+                // 很智障, 又判断不出来 null 已经被排除了
+                typeCountSample[sample[i]!.type] = 1;
+            }
+        }
+
+        // const totalTarget: number = target.length;
+        // const totalSample: number = sample.length;
+        let same: number = 0;
+
+        for (let key of Object.keys(typeCountTarget)) {
+            const countTarget = typeCountTarget[key];
+            const countSample = typeCountSample[key];
+
+            if (countSample) {
+                same += Math.min(countTarget, countSample);
+            }
+        }
+
+        return same;
+
+        // return {
+        //     target: totalTarget,
+        //     sample: totalSample,
+        //     same,
+        // };
+    }
+
     execute(code: BaseNode, append?: string) {
         const flattened: BaseNode[] = this.flatten(code, append);
         const files: string[] = Object.keys(this.astFlatten);
@@ -1148,6 +1214,88 @@ export default class Differ {
     private _executorCompare(target: BaseNode, sample: BaseNode) {
         if (target.type !== sample.type) {
             throw new Error('types of target and sample not same!');
+        }
+
+        switch (target.type) {
+            case 'ArrayExpression': {
+                const elementsTarget = (target as ArrayExpression).elements;
+                const elementsSample = (sample as ArrayExpression).elements;
+
+                let same = Differ.differArray(elementsTarget, elementsSample);
+
+                return `${same / Math.min(elementsTarget.length, elementsSample.length)}`;
+            }
+            case 'ArrayPattern': {
+                const elementsTarget = (target as ArrayPattern).elements;
+                const elementsSample = (sample as ArrayPattern).elements;
+                const decoratorsTarget = (target as ArrayPattern).decorators;
+                const decoratorsSample = (sample as ArrayPattern).decorators;
+
+                let sameElements = Differ.differArray(elementsTarget, elementsSample);
+                let sameDecorators = 0;
+
+                let sumTotal = Math.min(elementsTarget.length, elementsSample.length);
+
+                if (decoratorsTarget && decoratorsSample) {
+                    sameDecorators = Differ.differArray(elementsTarget, elementsSample);
+                    sumTotal += Math.min(decoratorsTarget.length, decoratorsSample.length);
+                }
+
+                let sumSame = sameElements + sameDecorators;
+
+                return `${sumSame / sumTotal}`;
+            }
+            case 'ArrowFunctionExpression': {
+                break;
+            }
+            case 'AssignmentExpression': {
+                break;
+            }
+            case 'AssignmentPattern': {
+                break;
+            }
+            case 'AwaitExpression': {
+                break;
+            }
+            case 'BigIntLiteral': {
+                break;
+            }
+            case 'Binary': {
+                break;
+            }
+            case 'BinaryExpression': {
+                break;
+            }
+            case 'BindExpression': {
+                break;
+            }
+            case 'Block': {
+                break;
+            }
+            case 'BlockParent': {
+                break;
+            }
+            case 'BlockStatement': {
+                break;
+            }
+            case 'BooleanLiteral': {
+                break;
+            }
+            case 'BooleanLiteralTypeAnnotation': {
+                break;
+            }
+            case 'BooleanTypeAnnotation': {
+                break;
+            }
+            case 'BreakStatement': {
+                break;
+            }
+            case 'AnyTypeAnnotation':
+            case 'ArgumentPlaceholder':
+            case 'ArrayTypeAnnotation': {
+                // 没有内容, 只是个标志
+                break;
+            }
         }
         return '';
     }
